@@ -50,8 +50,4 @@ jobs:
       run: |
         sed -i "s|image: .*|image: $IMAGE_URI|g" manifests/web-deployment.yaml
 
-    - name: Deploy to EKS
-      run: |
-        aws eks update-kubeconfig --name njt-eks-petclinic --region ap-northeast-2
-        kubectl apply -f manifests/web-deployment.yaml
 
