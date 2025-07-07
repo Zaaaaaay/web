@@ -42,7 +42,7 @@ jobs:
 
     - name: Clone manifests repo
       run: |
-        git clone https://github.com/giwoong-dev/manifests.git
+        git clone https://github.com/Zaaaaaay/manifests.git
         ls manifests/
 
     - name: Update image in web-deployment.yaml
