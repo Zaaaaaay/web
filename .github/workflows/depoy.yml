@@ -35,7 +35,7 @@ jobs:
     - name: Build and Push Docker image
       run: |
         IMAGE_TAG=latest
-        IMAGE_URI=620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web/latest
+        IMAGE_URI=620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:latest
         docker build -t $IMAGE_URI ./  # web 루트 기준
         docker push $IMAGE_URI
         echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
