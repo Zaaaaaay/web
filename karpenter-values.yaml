@@ -1,0 +1,11 @@
+controller:
+  clusterName: njt-eks-petclinic
+  clusterEndpoint: https://2022AF5C0B4816553952D5EF1CF9D301.gr7.ap-northeast-2.eks.amazonaws.com
+  serviceAccount:
+    create: false
+    name: karpenter
+
+settings:
+  aws:
+    defaultInstanceProfile: KarpenterNodeInstanceProfile
+    interruptionQueueName: karpenter-interruption

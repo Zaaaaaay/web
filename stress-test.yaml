@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-test
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: stress-test
+  template:
+    metadata:
+      labels:
+        app: stress-test
+        karpenter.sh/provisioner-name: default
+    spec:
+      containers:
+      - name: stress
+        image: busybox
+        command: ["sh", "-c", "while true; do :; done"]
+        resources:
+          requests:
+            cpu: "400m"
+            memory: "512Mi"
+
