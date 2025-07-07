@@ -1,0 +1,56 @@
+name: Build & Deploy Web
+
+on:
+  push:
+    branches: [ main ] # main 브랜치에 push될 때 실행
+
+env:
+  AWS_REGION: ap-northeast-2
+  CLUSTER_NAME: njt-eks-petclinic
+  REPO_NAME: web
+  ECR_URI: 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web
+  MANIFEST_REPO: https://github.com/Zaaaaay/manifests.git
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::620832535900:role/github-actions-role
+        aws-region: ap-northeast-2
+
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and Push Docker image
+      run: |
+        IMAGE_TAG=latest
+        IMAGE_URI=620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web/latest
+        docker build -t $IMAGE_URI ./  # web 루트 기준
+        docker push $IMAGE_URI
+        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+    - name: Clone manifests repo
+      run: |
+        git clone https://github.com/giwoong-dev/manifests.git
+        ls manifests/
+
+    - name: Update image in web-deployment.yaml
+      run: |
+        sed -i "s|image: .*|image: $IMAGE_URI|g" manifests/web-deployment.yaml
+
+    - name: Deploy to EKS
+      run: |
+        aws eks update-kubeconfig --name njt-eks-petclinic --region ap-northeast-2
+        kubectl apply -f manifests/web-deployment.yaml
+
