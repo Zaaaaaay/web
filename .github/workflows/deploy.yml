@@ -41,7 +41,7 @@ jobs:
           echo "Before sed:"
           grep image manifests/web-deployment.yaml
 
-          sed -i -E "s|^[[:space:]]*image:.*|          image: i620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:${IMAGE_TAG}|" manifests/web-deployment.yaml
+          sed -i -E "s|^[[:space:]]*image:.*|          image: 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:${IMAGE_TAG}|" manifests/web-deployment.yaml
 
           echo "After sed:"
           grep image manifests/web-deployment.yaml
