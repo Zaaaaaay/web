@@ -2,59 +2,50 @@ name: Build & Deploy Web
 
 on:
   push:
-    branches: [ main ] # main 브랜치에 push될 때 실행
-
-env:
-  AWS_REGION: ap-northeast-2
-  CLUSTER_NAME: njt-eks-petclinic
-  REPO_NAME: web
-  ECR_URI: 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web
-  MANIFEST_REPO: https://github.com/Zaaaaay/manifests.git
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v4
+      - name: Checkout web repo
+        uses: actions/checkout@v4
 
-    - name: Set image tag
-      run: echo "IMAGE_TAG=web-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+      - name: Set image tag
+        run: echo "IMAGE_TAG=web-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::620832535900:role/github-actions-role
-        aws-region: ap-northeast-2
+      - name: Login to Amazon ECR
+        run: |
+          aws configure set region ap-northeast-2
+          aws ecr get-login-password | docker login --username AWS --password-stdin 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com
 
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Build & Push Docker image
+        run: |
+          docker build -t 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:${IMAGE_TAG} .
+          docker push 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:${IMAGE_TAG}
 
-    - name: Build and Push Docker image
-      run: |
-        IMAGE_URI=620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:${{ env.IMAGE_TAG }}
-        docker build -t $IMAGE_URI ./
-        docker push $IMAGE_URI
-        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+      - name: Clone manifests repo
+        run: |
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/Zaaaaaay/manifests.git
+          cd manifests
+          git config user.name "ci-bot"
+          git config user.email "ci@example.com"
 
-    - name: Clone manifests repo
-      run: |
-        git clone https://github.com/Zaaaaaay/manifests.git
+      - name: Update deployment YAML
+        run: |
+          set -e
+          cd manifests
+          echo "Before sed:"
+          grep image web-deployment.yaml
 
-    - name: Update image in web-deployment.yaml
-      run: |
-        sed -i "s|image: .*|image: $IMAGE_URI|g" manifests/web-deployment.yaml
+          sed -i -E "s|(image:\s*).*|\1i620832535900.dkr.ecr.ap-northeast-2.amazonaws.com/web:${IMAGE_TAG}|" web-deployment.yaml
 
-    - name: Commit and push manifest changes
-      run: |
-        cd manifests
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add web-deployment.yaml
-        git commit -m "Update image tag to $IMAGE_URI"
-        git push https://x-access-token:${{ secrets.MANIFESTS_TOKEN }}@github.com/Zaaaaaay/manifests.git HEAD:main
+          echo "After sed:"
+          grep image web-deployment.yaml
+
+          git add web-deployment.yaml
+          git diff --cached
+          git commit -m "Update image tag to ${IMAGE_TAG}" || echo "Nothing to commit"
+          git push origin main
+
