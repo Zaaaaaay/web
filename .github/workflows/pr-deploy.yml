@@ -1,0 +1,8 @@
+# .github/workflows/deploy.yml
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main  # 오직 main 푸시일 때만 CD 실행
+
