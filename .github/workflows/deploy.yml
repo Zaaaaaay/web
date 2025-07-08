@@ -21,9 +21,7 @@ jobs:
         run: echo "IMAGE_TAG=web-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
 
       - name: Login to Amazon ECR
-        run: |
-          aws configure set region ap-northeast-2
-          aws ecr get-login-password | docker login --username AWS --password-stdin 620832535900.dkr.ecr.ap-northeast-2.amazonaws.com
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build & Push Docker image
         run: |
