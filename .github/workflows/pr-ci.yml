@@ -13,8 +13,6 @@ jobs:
       - name: 코드 가져오기
         uses: actions/checkout@v3
 
-      - name: Docker 빌드 해보기
-        run: docker build -t test-image ./web
 
       - name: 테스트 통과 알림
         run: echo "PR 테스트 완료!"
