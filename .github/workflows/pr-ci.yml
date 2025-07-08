@@ -2,6 +2,9 @@
 name: Pull Request CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:  # PR 열리거나 변경될 때 동작
     branches:
       - main      # 대상이 main에 병합되는 PR일 때만
