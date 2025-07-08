@@ -2,18 +2,17 @@
 name: Pull Request CI
 
 on:
-  pull_request:  # PR 열리거나 변경될 때 동작
+  pull_request:
     branches:
-      - main      # 대상이 main에 병합되는 PR일 때만
+      - main
 
 jobs:
-  test-build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: 코드 가져오기
+      - name: Checkout
         uses: actions/checkout@v3
 
-
-      - name: 테스트 통과 알림
-        run: echo "PR 테스트 완료!"
+      - name: Echo success
+        run: echo "✅ Success!"
 
