@@ -49,9 +49,8 @@ jobs:
 
           git -C manifests add web-deployment.yaml
           git -C manifests commit -m "Update image tag to ${IMAGE_TAG}" || echo "Nothing to commit"
-          git -C manifests push origin main
 
-      - name: Reconfigure git remote with token
+      - name: Set authenticated remote for push
         run: |
           cd manifests
           git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/Zaaaaaay/manifests.git
