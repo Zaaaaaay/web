@@ -50,4 +50,11 @@ jobs:
       run: |
         sed -i "s|image: .*|image: $IMAGE_URI|g" manifests/web-deployment.yaml
 
-
+    - name: Commit and push manifest changes
+      run: |
+        cd manifests
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add web-deployment.yaml
+        git commit -m "Update image tag to $IMAGE_URI"
+        git push https://x-access-token:${{ secrets.MANIFESTS_TOKEN }}@github.com/Zaaaaaay/manifests.git HEAD:main
